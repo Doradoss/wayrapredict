@@ -1,0 +1,99 @@
+<div class="view">
+  <app-encabezado eyebrow="Administración" titulo="Administración" subtitulo="Solicitudes de cuenta, roles y estado de las actualizaciones">
+    <label><span class="sr-only">Buscar usuario</span>
+      <input class="input input--busqueda" type="search" placeholder="Buscar por nombre, correo o institución" [value]="busqueda()" (input)="busqueda.set($any($event.target).value)">
+    </label>
+  </app-encabezado>
+
+  @if (pendientes() > 0) {
+    <div class="aviso aviso--advertencia"><svg class="ico ico--20" aria-hidden="true"><use href="#i-info"/></svg>
+      <span>Hay {{ pendientes() }} {{ pendientes() === 1 ? 'solicitud' : 'solicitudes' }} de cuenta institucional pendiente{{ pendientes() === 1 ? '' : 's' }} de aprobación. Verifica que el correo sea institucional (.gob.pe) y que la institución corresponda.</span>
+    </div>
+  }
+  @if (error()) {
+    <div class="aviso aviso--error mt"><svg class="ico ico--20" aria-hidden="true"><use href="#i-warning"/></svg><span>{{ error() }}</span></div>
+  }
+
+  <div class="card mt">
+    <div class="kpis">
+      <div class="kpi"><label>Usuarios activos</label><strong>{{ activos() }}</strong></div>
+      <div class="kpi"><label>Solicitudes pendientes</label><strong>{{ pendientes() }}</strong></div>
+      <div class="kpi"><label>Ejecuciones registradas</label><strong>{{ ejecuciones().length }}</strong></div>
+    </div>
+  </div>
+
+  <div class="split">
+    <div class="card card--tabla">
+      <h2>Usuarios y solicitudes</h2>
+      <p class="sub-title">Aprobación de cuentas institucionales y gestión de roles</p>
+      <div style="overflow-x: auto">
+        <table class="tabla">
+          <thead><tr><th scope="col">Usuario</th><th scope="col">Institución</th><th scope="col">Rol</th><th scope="col">Estado</th><th scope="col">Acciones</th></tr></thead>
+          <tbody>
+            @for (u of filtrados(); track u.idUsuario; let i = $index) {
+              <tr [style.animation-delay.ms]="i * 40">
+                <td><div class="celda-usuario"><b>{{ u.nombres }} {{ u.apellidos }}</b><small>{{ u.correo }}</small></div></td>
+                <td>{{ u.institucion ?? 'Equipo WayraPredict' }}@if (u.cargo) {<div class="meta">{{ u.cargo }}</div>}</td>
+                <td>{{ rol(u.rol) }}</td>
+                <td>
+                  @switch (u.estado) {
+                    @case ('aprobado') { <span class="tag tag--buena" [title]="u.aprobadoPor ? 'Aprobado por ' + u.aprobadoPor + ' · ' + fh(u.fechaAprobacion) : ''">Activo</span> }
+                    @case ('pendiente') { <span class="tag tag--moderada" [title]="'Solicitud del ' + fh(u.fechaRegistro)">Pendiente</span> }
+                    @default { <span class="tag tag--cuidado">Rechazado</span> }
+                  }
+                </td>
+                <td>
+                  @if (esYo(u)) {
+                    <span class="meta">Tu cuenta</span>
+                  } @else {
+                    <div class="acciones-fila">
+                      @if (u.estado === 'pendiente') {
+                        <button type="button" class="btn btn--sm primary" [disabled]="ocupado() === u.idUsuario" (click)="aprobar(u)">Aprobar</button>
+                        <button type="button" class="btn btn--sm" [disabled]="ocupado() === u.idUsuario" (click)="rechazar(u)">Rechazar</button>
+                      } @else if (u.estado === 'aprobado') {
+                        <button type="button" class="btn btn--sm" [disabled]="ocupado() === u.idUsuario" (click)="cambiarRol(u)">Cambiar rol</button>
+                        <button type="button" class="btn btn--sm peligro" [disabled]="ocupado() === u.idUsuario" (click)="rechazar(u)">Revocar</button>
+                      } @else {
+                        <button type="button" class="btn btn--sm" [disabled]="ocupado() === u.idUsuario" (click)="aprobar(u)">Aprobar</button>
+                      }
+                    </div>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="5" class="vacio">{{ cargando() ? 'Cargando usuarios…' : 'No hay usuarios que coincidan con la búsqueda.' }}</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="stack">
+      <div class="card">
+        <div class="row row--centro"><h2>Ejecuciones del proceso</h2><svg class="ico ico--18 muted" aria-hidden="true"><use href="#i-database"/></svg></div>
+        <p class="sub-title">Cargas de datos y predicciones (las más recientes primero)</p>
+        <ul class="feed">
+          @for (e of ultimasEjecuciones(); track e.idEjecucion; let i = $index) {
+            <li [title]="e.mensajeError ?? ''" [style.animation-delay.ms]="i * 60">
+              <span class="punto" [class.p-buena]="e.estado === 'completada'" [class.p-cuidado]="e.estado !== 'completada'"></span>
+              <div>
+                <b>{{ nombreEjecucion(e) }}</b>
+                <small>{{ e.estado === 'completada' ? 'Completada' : e.estado === 'en_curso' ? 'En curso' : 'Fallida' }} · {{ fh(e.fechaFin ?? e.fechaInicio) }}</small>
+              </div>
+            </li>
+          } @empty {
+            <li class="vacio">Sin ejecuciones registradas.</li>
+          }
+        </ul>
+      </div>
+      <div class="card">
+        <div class="row row--centro"><h2>Roles de acceso</h2><svg class="ico ico--18 muted" aria-hidden="true"><use href="#i-shield"/></svg></div>
+        <ul class="feed">
+          <li><span class="punto p-sin-dato"></span><div><b>Ciudadanía</b><small>Consulta sin cuenta el dashboard, las alertas y el asistente.</small></div></li>
+          <li><span class="punto p-marca"></span><div><b>Usuario institucional</b><small>Además, verifica predicciones pasadas.</small></div></li>
+          <li><span class="punto p-mala"></span><div><b>Administrador</b><small>Aprueba cuentas, gestiona roles y revisa las actualizaciones.</small></div></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

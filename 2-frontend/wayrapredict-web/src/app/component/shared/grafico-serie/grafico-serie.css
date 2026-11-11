@@ -1,0 +1,51 @@
+:host { display: flex; flex-direction: column; gap: 6px; margin-top: 14px; }
+.lienzo { position: relative; }
+:host(.llenar) { flex: 1; min-height: 0; }
+.lienzo--llenar { flex: 1; min-height: 280px; }
+.lienzo--llenar .grafico { position: absolute; inset: 0; height: 100%; }
+.grafico { width: 100%; height: auto; overflow: visible; font-family: var(--font); }
+
+.banda { fill-opacity: var(--banda-opacidad); animation: aparecer-svg .6s ease both; }
+.banda--buena { fill: var(--inca-buena); }
+.banda--moderada { fill: var(--inca-moderada); }
+.banda--mala { fill: var(--inca-mala); }
+.rejilla { stroke: var(--border); stroke-dasharray: 3 4; }
+.eje { fill: var(--body-subtle); font-size: 11px; }
+.eje--hoy { fill: var(--heading); font-weight: 700; }
+.hoy { stroke: var(--border-strong); stroke-dasharray: 2 3; }
+.hoy-texto { fill: var(--body-subtle); font-size: 11px; font-weight: 700; }
+.eca { stroke: var(--inca-cuidado); stroke-width: 1.4; stroke-dasharray: 6 4; }
+.eca-texto { fill: var(--inca-cuidado-text); font-size: 11px; font-weight: 700; }
+.oms { stroke: var(--purple); stroke-width: 1.2; stroke-dasharray: 2 4; }
+.oms-texto { fill: var(--purple); font-size: 11px; font-weight: 700; }
+
+/* Trazos animados */
+.area { animation: aparecer-svg .8s ease .5s both; }
+.linea { fill: none; stroke: var(--serie-obs); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round;
+  stroke-dasharray: 1; stroke-dashoffset: 1; animation: trazar 1.1s cubic-bezier(.4, 0, .2, 1) forwards; }
+.linea-pron { fill: none; stroke: var(--serie-pron); stroke-width: 2.2; stroke-dasharray: 6 5; stroke-linecap: round; animation: aparecer-svg .6s ease 1s both; }
+.intervalo { fill: var(--serie-pron-soft); stroke: none; animation: aparecer-svg .6s ease 1s both; }
+.punto { fill: var(--bg-raised); stroke: var(--serie-obs); stroke-width: 1.6; animation: aparecer-svg .3s ease both; }
+.punto-pron { fill: var(--bg-raised); stroke: var(--serie-pron); stroke-width: 2.2; animation: brotar .35s cubic-bezier(.3, 1.5, .6, 1) both; transform-box: fill-box; transform-origin: center; }
+@keyframes trazar { to { stroke-dashoffset: 0; } }
+@keyframes aparecer-svg { from { opacity: 0; } to { opacity: 1; } }
+@keyframes brotar { from { opacity: 0; transform: scale(0); } to { opacity: 1; transform: scale(1); } }
+
+/* Interacción */
+.captura { fill: transparent; cursor: crosshair; }
+.guia { stroke: var(--border-strong); stroke-width: 1; pointer-events: none; }
+.foco { fill: var(--serie-obs); stroke: var(--bg-raised); stroke-width: 2; pointer-events: none; }
+.foco--pron { fill: var(--serie-pron); }
+
+.tt { position: absolute; top: 8px; transform: translateX(12px); pointer-events: none; z-index: 2;
+  background: var(--bg-raised); border: 1px solid var(--border-medium); border-radius: var(--radius); box-shadow: var(--shadow-lg);
+  padding: 10px 12px; font-size: 12px; min-width: 190px; display: flex; flex-direction: column; gap: 4px; animation: aparecer-svg .12s ease both; }
+.tt--izq { transform: translateX(calc(-100% - 12px)); }
+.tt b { color: var(--heading); font-size: 13px; }
+.tt__rel { color: var(--body-subtle); font-size: 11px; margin-top: -3px; }
+.tt__fila { display: flex; align-items: center; gap: 6px; color: var(--body); }
+.tt__fila strong { margin-left: auto; color: var(--heading); padding-left: 10px; }
+.tt__marca { width: 10px; height: 3px; border-radius: 2px; background: var(--serie-obs); }
+.tt__marca--pron { background: var(--serie-pron); }
+.tt__nota { color: var(--body-subtle); font-size: 11px; margin-top: -2px; }
+.tt .tag { align-self: flex-start; margin-top: 4px; }

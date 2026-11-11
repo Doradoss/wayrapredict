@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none" stroke-linecap="round" stroke-linejoin="round"><title>WayraPredict</title>
+  <mask id="m3" maskUnits="userSpaceOnUse" x="0" y="0" width="100" height="100">
+    <rect width="100" height="100" fill="#fff"/>
+    <path d="M12,71 C25,63 37,62 50,67 C63,72 75,74 88,62" stroke="#000" stroke-width="14.5"/>
+  </mask>
+  <path d="M15,80 L30,46 L38,55 L50,22 L62,55 L70,46 L85,80 Z" stroke="#0f2f3a" stroke-width="7" mask="url(#m3)"/>
+  <path d="M12,71 C25,63 37,62 50,67 C63,72 75,74 88,62" stroke="#0f766e" stroke-width="7.5"/>
+</svg>

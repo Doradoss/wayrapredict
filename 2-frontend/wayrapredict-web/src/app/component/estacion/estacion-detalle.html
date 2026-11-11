@@ -1,0 +1,147 @@
+<div class="view">
+  <app-encabezado eyebrow="Estaciones" [titulo]="estacion() ? estacion()!.nombre + ' · ' + cont(estacion()!.contaminante) : 'Detalle de estación'"
+                  subtitulo="Serie histórica, predicción, verificación y recomendaciones por categoría INCA">
+    <div class="filtros">
+      <label class="selector"><span>Departamento</span>
+        <select [value]="departamento()" (change)="cambiarDepartamento($any($event.target).value)">
+          @for (d of departamentos(); track d) { <option [value]="d" [selected]="d === departamento()">{{ d }}</option> }
+        </select>
+      </label>
+      <label class="selector"><span>Estación</span>
+        <select [value]="codigo()" (change)="irA($any($event.target).value)">
+          @for (e of estacionesDepto(); track e.codigo) { <option [value]="e.codigo" [selected]="e.codigo === codigo()">{{ e.nombre }} · {{ e.codigo }}</option> }
+        </select>
+      </label>
+      <label class="selector"><span>Horizonte</span>
+        <select disabled><option>{{ proximos().length || 3 }} días</option></select>
+      </label>
+    </div>
+  </app-encabezado>
+
+  @if (error()) {
+    <div class="aviso aviso--error"><svg class="ico ico--20" aria-hidden="true"><use href="#i-warning"/></svg><span>{{ error() }}</span></div>
+  }
+
+  @if (estacion(); as e) {
+    <div class="card">
+      <div class="kpis">
+        <div class="kpi"><label>Hoy ({{ fl(e.fechaReferencia) }})</label><strong>{{ num(e.ultimoValor, 0) }}<small>{{ uni(e.unidad) }}</small></strong></div>
+        <div class="kpi"><label>Categoría actual</label><strong><span [class]="'tag tag--lg tag--' + cat(e.categoriaUltimoValor)">{{ e.categoriaUltimoValor ?? 'Sin dato' }}</span></strong></div>
+        @if (diaCritico(); as d) {
+          <div class="kpi"><label>Peor día previsto</label><strong><span [class]="'tag tag--lg tag--' + cat(d.categoriaInca)">{{ d.categoriaInca }}</span><small>{{ etiquetaDia(d) }}</small></strong></div>
+        }
+        <div class="kpi"><label>ECA-Aire 24 h</label><strong>{{ e.eca24h }}<small>{{ uni(e.unidad) }}</small></strong></div>
+        <div class="kpi"><label>Ubicación</label><strong class="ubicacion">{{ e.departamento }}{{ e.provincia ? ', ' + e.provincia : '' }}<small>{{ e.altitud ? num(e.altitud) + ' m s. n. m.' : '' }}</small></strong></div>
+      </div>
+    </div>
+
+    <div class="split">
+      <div class="card">
+        <div class="card__head">
+          <div>
+            <h2>Histórico y predicción de {{ cont(e.contaminante) }}</h2>
+            <p class="sub-title">Promedio diario ({{ uni(e.unidad) }}) de los últimos 30 días, con intervalo de incertidumbre</p>
+          </div>
+        </div>
+        <app-grafico-serie [observados]="observados()" [pronostico]="pronostico()" [referencia]="e.fechaReferencia"
+                           [eca]="e.eca24h" [oms]="e.oms24h" [unidad]="uni(e.unidad)" [alto]="340"/>
+        <div class="legend">
+          <span><i style="background: var(--serie-obs)"></i>Observado</span>
+          <span><i class="dash"></i>Predicción Prophet-LSTM</span>
+          <span><i class="caja" style="background: var(--serie-pron-soft)"></i>Intervalo (80 %)</span>
+          <span><i class="bandas"></i>Bandas INCA</span>
+          <span class="muted">Pasa el cursor por el gráfico para ver el detalle de cada día</span>
+        </div>
+      </div>
+
+      <div class="stack">
+        <div class="card">
+          @if (diaCritico(); as d) {
+            <div class="row row--centro">
+              <h2>Recomendaciones para {{ etiquetaDia(d) }}</h2>
+              <span [class]="'tag tag--' + cat(d.categoriaInca)">{{ d.categoriaInca }}</span>
+            </div>
+            <ul class="feed">
+              @for (r of recomendaciones(); track $index) {
+                <li [style.animation-delay.ms]="$index * 80"><span [class]="'punto p-' + cat(d.categoriaInca)"></span><span>{{ r }}.</span></li>
+              }
+            </ul>
+            <p class="nota">Según las recomendaciones del INCA para la categoría prevista.</p>
+          } @else {
+            <h2>Recomendaciones</h2>
+            <div class="vacio">Sin pronóstico disponible.</div>
+          }
+        </div>
+        <div class="card">
+          <h2>Condiciones meteorológicas recientes</h2>
+          <dl class="mt">
+            @for (m of meteo(); track m.nombre) {
+              <div class="kv" [title]="m.dato ? fl(m.dato.fecha) + ' · ' + origen(m.dato.origen) : 'Sin dato'">
+                <dt><svg class="ico" aria-hidden="true"><use [attr.href]="m.icono"/></svg>{{ m.nombre }}</dt>
+                <dd>{{ m.dato ? num(m.dato.valor, m.dec) + ' ' + m.unidad : '—' }}</dd>
+              </div>
+            }
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="card card--tabla mt">
+      <h2>Predicciones pasadas y verificación</h2>
+      <p class="sub-title">Predicción a 1 día comparada con el valor observado.
+        @if (loginService.esInstitucional()) { Como usuario institucional puedes verificar las predicciones. } @else { Todos los visitantes ven el distintivo de verificación. }
+      </p>
+      <div class="tabla-scroll">
+        <table class="tabla">
+          <thead><tr>
+            <th scope="col">Día</th><th scope="col" class="num">Previsto <span class="u">({{ uni(e.unidad) }})</span></th>
+            <th scope="col" class="num">Observado <span class="u">({{ uni(e.unidad) }})</span></th><th scope="col" class="num">Error</th>
+            <th scope="col">Categoría observada</th><th scope="col">Verificación</th>
+          </tr></thead>
+          <tbody>
+            @for (p of historial(); track p.idPrediccion; let i = $index) {
+              <tr [style.animation-delay.ms]="i * 40">
+                <td class="fuerte">{{ rel(p.diasDesdeReferencia) }} <span class="meta">&nbsp;· {{ fl(p.fechaObjetivo) }}</span></td>
+                <td class="num">{{ num(p.valor, 0) }}</td>
+                <td class="num">{{ num(p.observado, 0) }}</td>
+                <td class="num meta">{{ p.observado !== null ? (p.valor - p.observado > 0 ? '+' : '') + num(p.valor - p.observado, 0) : '—' }}</td>
+                <td>
+                  @if (p.categoriaObservada) { <span [class]="'tag tag--' + cat(p.categoriaObservada)">{{ p.categoriaObservada }}</span> }
+                  @else { <span class="meta">Sin medición</span> }
+                </td>
+                <td>
+                  @if (p.verificado) {
+                    <span class="verificado" [title]="'Verificado por ' + p.verificadoPor + ' · ' + fh(p.fechaVerificacion)"><svg class="ico" aria-hidden="true"><use href="#i-check-circle"/></svg>Verificado por autoridad</span>
+                  } @else if (loginService.esInstitucional()) {
+                    <button type="button" class="btn btn--sm" [disabled]="verificando() === p.idPrediccion" (click)="verificar(p)">
+                      <svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>{{ verificando() === p.idPrediccion ? 'Verificando…' : 'Verificar' }}</button>
+                  } @else {
+                    <span class="meta">Sin verificar</span>
+                  }
+                </td>
+              </tr>
+            } @empty {
+              <tr><td colspan="6" class="vacio">Sin predicciones pasadas en los últimos días.</td></tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card mt">
+      <div class="card__head">
+        <div>
+          <h2>Desempeño del modelo</h2>
+          <p class="sub-title">Evaluado con el conjunto de prueba de esta estación (predicción a 1 día){{ metrica() ? ' · versión ' + metrica()!.version : '' }}</p>
+        </div>
+      </div>
+      <div class="metricas">
+        <div class="metrica"><label>RMSE ({{ uni(e.unidad) }})</label><strong>{{ num(metrica()?.rmse, 2) }}</strong></div>
+        <div class="metrica"><label>MAE ({{ uni(e.unidad) }})</label><strong>{{ num(metrica()?.mae, 2) }}</strong></div>
+        <div class="metrica"><label>R²</label><strong>{{ num(metrica()?.r2, 2) }}</strong></div>
+      </div>
+    </div>
+  } @else if (!error()) {
+    <div class="cargando">Cargando estación…</div>
+  }
+</div>

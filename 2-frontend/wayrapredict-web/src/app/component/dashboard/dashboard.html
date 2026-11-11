@@ -1,0 +1,128 @@
+<div class="view">
+  <app-encabezado eyebrow="Inicio" titulo="Calidad del aire en los departamentos piloto"
+                  subtitulo="Predicciones diarias clasificadas según el INCA y el ECA-Aire">
+    <div class="filtros">
+      <app-desplegable etiqueta="Departamento" [opciones]="opcionesDepartamento()" [valor]="filtroDepartamento()" (cambio)="cambiarDepartamento($event)"/>
+      <app-desplegable etiqueta="Contaminante" [opciones]="opcionesContaminante()" [valor]="filtroContaminante()" (cambio)="cambiarContaminante($event)"/>
+    </div>
+  </app-encabezado>
+
+  @if (alertaPrincipal(); as a) {
+    <div class="aviso aviso--alerta">
+      <svg class="ico ico--20" aria-hidden="true"><use href="#i-warning"/></svg>
+      <div class="aviso__cuerpo">
+        <b>Alerta anticipada: calidad del aire {{ a.categoriaInca }} por {{ cont(a.contaminante) }} en {{ a.estacionNombre }} ({{ a.departamento }}) {{ rel(a.diasDesdeReferencia).toLowerCase() }}</b>
+        <span>
+          @if (a.superaEca) { Se prevé superar el ECA-Aire de 24 h. }
+          Valor previsto: {{ num(a.valor, 0) }} µg/m³ (INCA {{ num(a.valorInca, 0) }}). Personas con asma, niños y adultos mayores deben reducir la actividad al aire libre.
+        </span>
+      </div>
+      <a class="btn" routerLink="/alertas">Ver alertas</a>
+    </div>
+  } @else if (!cargando()) {
+    <div class="aviso aviso--ok"><svg class="ico ico--20" aria-hidden="true"><use href="#i-check-circle"/></svg>
+      <span>Sin alertas vigentes: no se prevé calidad del aire Moderada o peor en los próximos días.</span></div>
+  }
+
+  @if (error()) {
+    <div class="aviso aviso--error mt"><svg class="ico ico--20" aria-hidden="true"><use href="#i-warning"/></svg><span>{{ error() }}</span></div>
+  }
+
+  <div class="card mt">
+    <div class="kpis">
+      <div class="kpi"><label>Estaciones vigiladas</label><strong>{{ estaciones().length }}</strong></div>
+      <div class="kpi"><label>Alertas vigentes</label><strong>{{ alertas().length }}</strong></div>
+      <div class="kpi"><label>Peor categoría prevista</label>
+        <strong>@if (peorPrevista(); as p) { <span [class]="'tag tag--lg tag--' + cat(p)">{{ p }}</span> } @else { — }</strong>
+      </div>
+      <div class="kpi kpi--sm"><label>Predicciones cargadas el
+          <span class="tip" tabindex="0" role="note" aria-label="Qué significa esta fecha"
+                data-tip="Fecha y hora en que el proceso registró las predicciones en la base de datos. No es la fecha de los datos: cada estación muestra su «día actual», el último día con medición considerado.">i</span></label>
+        <strong>{{ ultimaActualizacion() }}</strong></div>
+    </div>
+  </div>
+
+  @if (cargando()) { <div class="cargando">Cargando estaciones…</div> }
+
+  <div class="estaciones mt">
+    @for (e of visibles(); track e.codigo; let i = $index) {
+      <button type="button" class="estacion" [class.sel]="e.codigo === seleccionada()" (click)="seleccionar(e.codigo)"
+              [style.animation-delay.ms]="i * 70" [attr.aria-pressed]="e.codigo === seleccionada()">
+        <div class="estacion__cab">
+          <div>
+            <span class="eyebrow">{{ e.departamento }}</span>
+            <b>{{ e.nombre }}</b>
+            <small>{{ e.codigo }}</small>
+          </div>
+          <span class="tag tag--marca">{{ cont(e.contaminante) }}</span>
+        </div>
+        <div class="estacion__lectura">
+          <div class="kpi"><label>Último promedio diario</label><strong>{{ num(e.ultimoValor, 0) }}<small>{{ uni(e.unidad) }}</small></strong></div>
+          <span [class]="'tag tag--' + cat(e.categoriaUltimoValor)"><span [class]="'punto p-' + cat(e.categoriaUltimoValor)"></span>{{ e.categoriaUltimoValor ?? 'Sin dato' }}</span>
+        </div>
+        <div class="bar"><i [class]="'b-' + cat(e.categoriaUltimoValor)" [style.width.%]="anchoInca(e.ultimoValorInca)"></i></div>
+        <small class="muted estacion__hoy">Día actual de la estación: {{ fl(e.fechaReferencia) }}</small>
+        <div class="estacion__dias">
+          @for (p of proximos()[e.codigo] ?? []; track p.idPrediccion) {
+            <div class="estacion__dia" [title]="fl(p.fechaObjetivo) + ': ' + num(p.valor, 0) + ' µg/m³'">
+              <span>{{ etiquetaDia(p) }}</span>
+              <i [class]="'b-' + cat(p.categoriaInca)"></i>
+              <small>{{ p.categoriaInca }}</small>
+            </div>
+          } @empty {
+            <small class="muted">Sin pronóstico</small>
+          }
+        </div>
+      </button>
+    } @empty {
+      @if (!cargando()) { <div class="vacio">No hay estaciones para los filtros elegidos.</div> }
+    }
+  </div>
+
+  @if (visibles().length && estacion(); as e) {
+    <div class="split split--parejo">
+      <div class="card card--grafico">
+        <div class="card__head">
+          <div>
+            <h2>{{ cont(e.contaminante) }} · {{ e.nombre }} ({{ e.codigo }})</h2>
+            <p class="sub-title">Promedio diario ({{ uni(e.unidad) }}): últimos 14 días y predicción a {{ proximosSel().length }} días</p>
+          </div>
+          <a class="btn" [routerLink]="['/estacion', e.codigo]">Ver detalle<svg class="ico" style="transform: rotate(-90deg)" aria-hidden="true"><use href="#i-chevron"/></svg></a>
+        </div>
+        <app-grafico-serie [observados]="observados()" [pronostico]="pronostico()" [referencia]="e.fechaReferencia"
+                           [eca]="e.eca24h" [oms]="e.oms24h" [unidad]="uni(e.unidad)" [llenar]="true" class="llenar"/>
+        <div class="legend">
+          <span><i style="background: var(--serie-obs)"></i>Observado</span>
+          <span><i class="dash"></i>Predicción Prophet-LSTM</span>
+          <span><i class="caja" style="background: var(--serie-pron-soft)"></i>Intervalo de incertidumbre (80 %)</span>
+          <span><i class="bandas"></i>Bandas INCA</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Próximos días</h2>
+        <p class="sub-title">{{ cont(e.contaminante) }} previsto en {{ e.nombre }} ({{ uni(e.unidad) }})</p>
+        <app-barras-dias [barras]="barras()" [eca]="e.eca24h"/>
+        <div class="actions">
+          @for (p of proximosSel(); track p.idPrediccion; let i = $index) {
+            <div class="action" [style.animation-delay.ms]="200 + i * 90">
+              <div class="ai">+{{ p.diasDesdeReferencia }}d</div>
+              <div class="body">
+                <div class="t">{{ rel(p.diasDesdeReferencia) }} <span [class]="'tag tag--' + cat(p.categoriaInca)">{{ p.categoriaInca }}</span></div>
+                <div class="d">Intervalo {{ num(p.limiteInferior, 0) }} – {{ num(p.limiteSuperior, 0) }} · INCA {{ num(p.valorInca, 0) }}</div>
+                <div class="bar"><i [class]="'b-' + cat(p.categoriaInca)" [style.width.%]="anchoInca(p.valorInca)"></i></div>
+              </div>
+              <div class="v">{{ num(p.valor, 0) }}<small>{{ uni(e.unidad) }}</small></div>
+            </div>
+          } @empty {
+            <div class="vacio">Sin pronóstico disponible.</div>
+          }
+        </div>
+        @if (proximosSel().length && !proximosSel()[0].modeloVigente) {
+          <p class="nota mt">Pronóstico del modelo de respaldo ({{ proximosSel()[0].versionModelo }}).</p>
+        }
+        <p class="nota mt">Día actual de la estación: {{ fl(e.fechaReferencia) }}</p>
+      </div>
+    </div>
+  }
+</div>

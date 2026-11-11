@@ -1,0 +1,82 @@
+<div class="lienzo" #lienzo [class.lienzo--llenar]="llenar()">
+  <svg class="grafico" [attr.viewBox]="'0 0 ' + ancho + ' ' + altoEf()" role="img"
+       aria-label="Serie observada y predicción con intervalo de incertidumbre">
+    <defs>
+      <linearGradient [attr.id]="id + '-area'" x1="0" y1="0" x2="0" y2="1">
+        <stop offset="0%" stop-color="var(--serie-obs)" stop-opacity="0.32"/>
+        <stop offset="100%" stop-color="var(--serie-obs)" stop-opacity="0"/>
+      </linearGradient>
+    </defs>
+
+    @for (b of bandas(); track b.clase) {
+      <rect [attr.x]="izq" [attr.y]="b.y" [attr.width]="ancho - izq - der" [attr.height]="b.alto" [attr.class]="'banda banda--' + b.clase"/>
+    }
+    @for (m of marcas(); track $index) {
+      <line [attr.x1]="izq" [attr.x2]="ancho - der" [attr.y1]="m.y" [attr.y2]="m.y" class="rejilla"/>
+      <text [attr.x]="izq - 8" [attr.y]="m.y + 4" text-anchor="end" class="eje">{{ m.texto }}</text>
+    }
+    @if (hayHoy()) {
+      <line [attr.x1]="xHoy()" [attr.x2]="xHoy()" [attr.y1]="arriba" [attr.y2]="base()" class="hoy"/>
+      <text [attr.x]="xHoy() + 6" [attr.y]="arriba + 12" class="hoy-texto">Hoy</text>
+    }
+    @if (ecaVisible()) {
+      <line [attr.x1]="izq" [attr.x2]="ancho - der" [attr.y1]="y(eca())" [attr.y2]="y(eca())" class="eca"/>
+      <text [attr.x]="ancho - der - 4" [attr.y]="y(eca()) - 6" text-anchor="end" class="eca-texto">ECA-Aire 24 h ({{ eca() }})</text>
+    }
+    @if (omsVisible()) {
+      <line [attr.x1]="izq" [attr.x2]="ancho - der" [attr.y1]="y(oms()!)" [attr.y2]="y(oms()!)" class="oms"/>
+      <text [attr.x]="izq + 6" [attr.y]="y(oms()!) - 6" class="oms-texto">Guía OMS ({{ oms() }})</text>
+    }
+
+    <!-- Trazos animados: se recrean cuando cambian los datos -->
+    @for (k of [clave()]; track k) {
+      <g>
+        @if (areaObservado()) { <path [attr.d]="areaObservado()" [attr.fill]="'url(#' + id + '-area)'" class="area"/> }
+        @if (intervalo()) { <path [attr.d]="intervalo()" class="intervalo"/> }
+        <path [attr.d]="trazoObservado()" class="linea" pathLength="1"/>
+        @if (trazoPronostico()) { <path [attr.d]="trazoPronostico()" class="linea-pron"/> }
+        @for (p of puntosObservados(); track $index) {
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="2.6" class="punto" [style.animation-delay.ms]="300 + $index * 25"/>
+        }
+        @for (p of puntosPronostico(); track $index) {
+          <circle [attr.cx]="p.x" [attr.cy]="p.y" r="4" class="punto-pron" [style.animation-delay.ms]="1050 + $index * 120"/>
+        }
+      </g>
+    }
+
+    @for (e of etiquetasX(); track $index) {
+      <text [attr.x]="e.x" [attr.y]="altoEf() - 8" text-anchor="middle" class="eje" [class.eje--hoy]="e.hoy">{{ e.texto }}</text>
+    }
+
+    @if (detalle(); as d) {
+      <line [attr.x1]="d.x" [attr.x2]="d.x" [attr.y1]="arriba" [attr.y2]="base()" class="guia"/>
+      @if (d.obs) { <circle [attr.cx]="d.x" [attr.cy]="d.obs.y" r="5" class="foco"/> }
+      @if (d.pron) { <circle [attr.cx]="d.x" [attr.cy]="d.pron.y" r="5" class="foco foco--pron"/> }
+    }
+    <rect [attr.x]="izq - 10" [attr.y]="0" [attr.width]="ancho - izq - der + 20" [attr.height]="base()" class="captura"
+          (pointermove)="mover($event)" (pointerleave)="activo.set(null)"/>
+  </svg>
+
+  @if (detalle(); as d) {
+    <div class="tt" [style.left.%]="d.izqPct" [class.tt--izq]="d.derecha">
+      <b>{{ d.fecha }}</b>
+      <span class="tt__rel">{{ d.relativo }}</span>
+      @if (d.obs) {
+        <div class="tt__fila"><i class="tt__marca"></i>Observado <strong>{{ d.obs.texto }} {{ unidad() }}</strong></div>
+        @if (d.obs.origen) { <span class="tt__nota">{{ d.obs.origen }}</span> }
+      }
+      @if (d.pron) {
+        <div class="tt__fila"><i class="tt__marca tt__marca--pron"></i>Predicción <strong>{{ d.pron.texto }} {{ unidad() }}</strong></div>
+        @if (d.pron.intervalo) { <span class="tt__nota">Intervalo {{ d.pron.intervalo }}</span> }
+      }
+      @if (d.categoria) {
+        <span [class]="'tag tag--' + d.claseCategoria">{{ d.categoria }} · INCA {{ d.inca }}</span>
+      } @else {
+        <span class="tt__nota">Sin medición</span>
+      }
+    </div>
+  }
+</div>
+@if (!ecaVisible()) {
+  <span class="nota">El ECA-Aire de 24 h ({{ eca() }} {{ unidad() }}) está por encima de la escala del gráfico.</span>
+}

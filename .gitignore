@@ -1,0 +1,47 @@
+# WayraPredict · qué NO se sube al repositorio
+# Los datos de entrada, los modelos entrenados y los resultados se generan con los scripts
+# y quedan solo en la computadora del equipo (son pesados y la aplicación no los necesita).
+
+# --- Datos y artefactos del ML ---
+*.pkl
+*.keras
+*.h5
+*.joblib
+*.db
+*.dump
+*.parquet
+*.csv
+*.xlsx
+*.xls
+*.dat
+**/__pycache__/
+
+# --- Backend (Java / Maven / IntelliJ) ---
+target/
+*.class
+*.log
+.idea/
+*.iml
+out/
+
+# --- Frontend (Angular / Node) ---
+node_modules/
+dist/
+.angular/
+.vscode/
+coverage/
+
+# --- Secretos (nunca deben subirse) ---
+.env
+.env.*
+*.pem
+*.key
+*.pfx
+*.publishsettings
+*.PublishSettings
+
+# --- Sistema ---
+Thumbs.db
+desktop.ini
+.DS_Store
+~$*
