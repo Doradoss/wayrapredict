@@ -1,3 +1,7 @@
 .ubicacion { font-size: 18px !important; }
 .tabla-scroll { overflow-x: auto; }
 .feed li span:last-child { line-height: 1.5; }
+
+/* Mientras llegan los datos de la estación elegida, el gráfico anterior se atenúa (no se anima con datos mezclados) */
+app-grafico-serie { transition: opacity .2s ease; }
+app-grafico-serie.grafico--actualizando { opacity: .55; }

@@ -80,7 +80,7 @@
   </div>
 
   @if (visibles().length && estacion(); as e) {
-    <div class="split split--parejo">
+    <div class="split split--parejo" [class.split--actualizando]="actualizando()">
       <div class="card card--grafico">
         <div class="card__head">
           <div>

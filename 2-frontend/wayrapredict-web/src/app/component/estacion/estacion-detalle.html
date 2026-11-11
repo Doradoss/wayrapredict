@@ -43,8 +43,11 @@
             <p class="sub-title">Promedio diario ({{ uni(e.unidad) }}) de los últimos 30 días, con intervalo de incertidumbre</p>
           </div>
         </div>
-        <app-grafico-serie [observados]="observados()" [pronostico]="pronostico()" [referencia]="e.fechaReferencia"
-                           [eca]="e.eca24h" [oms]="e.oms24h" [unidad]="uni(e.unidad)" [alto]="340"/>
+        @if (estacionGrafico(); as g) {
+          <app-grafico-serie [observados]="observados()" [pronostico]="pronostico()" [referencia]="g.fechaReferencia"
+                             [eca]="g.eca24h" [oms]="g.oms24h" [unidad]="uni(g.unidad)" [alto]="340"
+                             [class.grafico--actualizando]="actualizandoGrafico()"/>
+        }
         <div class="legend">
           <span><i style="background: var(--serie-obs)"></i>Observado</span>
           <span><i class="dash"></i>Predicción Prophet-LSTM</span>

@@ -27,10 +27,14 @@ export class Dashboard implements OnInit {
   estaciones = signal<Estacion[]>([]);
   proximos = signal<Record<string, Prediccion[]>>({});
   alertas = signal<Alerta[]>([]);
-  serie = signal<SerieDiaria[]>([]);
+  // Series de los últimos 14 días por estación (se piden una vez y se reutilizan al volver a una estación)
+  series = signal<Record<string, SerieDiaria[]>>({});
+  // seleccionada: la estación elegida (tarjeta resaltada). mostrada: la del gráfico y los próximos días, que solo
+  // cambia cuando ya llegaron su serie y su pronóstico (así la animación no dibuja datos mezclados de dos estaciones)
   seleccionada = signal<string>('');
+  mostrada = signal<string>('');
   cargando = signal(true);
-  cargandoSerie = signal(false);
+  actualizando = computed(() => this.seleccionada() !== this.mostrada());
   error = signal('');
   filtroDepartamento = signal('');
   filtroContaminante = signal('');
@@ -53,8 +57,8 @@ export class Dashboard implements OnInit {
              (!this.filtroContaminante() || e.contaminante === this.filtroContaminante())
     )
   );
-  estacion = computed(() => this.estaciones().find((e) => e.codigo === this.seleccionada()) ?? null);
-  proximosSel = computed(() => this.proximos()[this.seleccionada()] ?? []);
+  estacion = computed(() => this.estaciones().find((e) => e.codigo === this.mostrada()) ?? null);
+  proximosSel = computed(() => this.proximos()[this.mostrada()] ?? []);
   ultimaActualizacion = computed(() => {
     const f = this.estaciones().map((e) => e.ultimaActualizacionPredicciones).filter((x): x is string => !!x).sort();
     return f.length ? fechaHora(f[f.length - 1]) : '—';
@@ -74,7 +78,7 @@ export class Dashboard implements OnInit {
   });
 
   observados = computed<PuntoObservado[]>(() =>
-    this.serie().filter((d) => !d.posteriorAReferencia).map((d) => ({ fecha: d.fecha, valor: d.contaminante, origen: d.origenContaminante }))
+    (this.series()[this.mostrada()] ?? []).filter((d) => !d.posteriorAReferencia).map((d) => ({ fecha: d.fecha, valor: d.contaminante, origen: d.origenContaminante }))
   );
   pronostico = computed<PuntoPronostico[]>(() =>
     this.proximosSel().map((p) => ({ fecha: p.fechaObjetivo, valor: p.valor, inferior: p.limiteInferior, superior: p.limiteSuperior }))
@@ -100,9 +104,10 @@ export class Dashboard implements OnInit {
       next: (est) => {
         this.estaciones.set(est);
         if (est.length) this.seleccionar(est[0].codigo);
+        est.slice(1).forEach((e) => this.pedirSerie(e));   // las demás se precargan: cambiar de estación es inmediato
         forkJoin(Object.fromEntries(est.map((e) => [e.codigo, this.prediccionService.getProximosDias(e.codigo)]))).subscribe({
-          next: (p) => { this.proximos.set(p); this.cargando.set(false); },
-          error: (err) => { this.error.set(mensajeError(err)); this.cargando.set(false); },
+          next: (p) => { this.proximos.set(p); this.cargando.set(false); this.mostrarSiEstaLista(); },
+          error: (err) => { this.error.set(mensajeError(err)); this.cargando.set(false); this.mostrarSiEstaLista(); },
         });
       },
       error: (err) => { this.error.set(mensajeError(err)); this.cargando.set(false); },
@@ -129,19 +134,26 @@ export class Dashboard implements OnInit {
 
   // Selecciona la estación del gráfico: últimos 14 días hasta el día actual
   seleccionar(codigo: string): void {
-    if (codigo === this.seleccionada() && this.serie().length) return;
+    if (codigo === this.seleccionada()) return;
     this.seleccionada.set(codigo);
     this.asistenteService.estacionEnPantalla.set(codigo);   // contexto para el asistente
     const e = this.estaciones().find((x) => x.codigo === codigo);
     if (!e) return;
-    this.cargandoSerie.set(true);
-    this.estacionService.getSerieDiaria(codigo, sumarDias(e.fechaReferencia, -13), e.fechaReferencia).subscribe({
-      next: (s) => {
-        if (this.seleccionada() === codigo) this.serie.set(s);
-        this.cargandoSerie.set(false);
-      },
-      error: () => { this.serie.set([]); this.cargandoSerie.set(false); },
+    if (codigo in this.series()) this.mostrarSiEstaLista();
+    else this.pedirSerie(e);
+  }
+
+  private pedirSerie(e: Estacion): void {
+    this.estacionService.getSerieDiaria(e.codigo, sumarDias(e.fechaReferencia, -13), e.fechaReferencia).subscribe({
+      next: (s) => { this.series.update((m) => ({ ...m, [e.codigo]: s })); this.mostrarSiEstaLista(); },
+      error: () => { this.series.update((m) => ({ ...m, [e.codigo]: [] })); this.mostrarSiEstaLista(); },
     });
+  }
+
+  // Cambia el gráfico solo cuando la estación elegida tiene su serie y ya se cargaron los pronósticos
+  private mostrarSiEstaLista(): void {
+    const c = this.seleccionada();
+    if (c && c in this.series() && !this.cargando()) this.mostrada.set(c);
   }
 
   etiquetaDia(p: Prediccion): string {

@@ -1,5 +1,6 @@
 import { Component, computed, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { catchError, forkJoin, of } from 'rxjs';
 import { Estacion } from '../../model/estacion';
 import { MetricaModelo } from '../../model/metrica';
 import { Prediccion } from '../../model/prediccion';
@@ -49,6 +50,10 @@ export class EstacionDetalle implements OnInit {
   departamentos = computed(() => [...new Set(this.estaciones().map((e) => e.departamento))]);
   estacionesDepto = computed(() => this.estaciones().filter((e) => !this.departamento() || e.departamento === this.departamento()));
   estacion = computed(() => this.estaciones().find((e) => e.codigo === this.codigo()) ?? null);
+  // Estación de los datos que tiene el gráfico: cambia junto con su serie y su pronóstico (una sola animación)
+  codigoGrafico = signal('');
+  estacionGrafico = computed(() => this.estaciones().find((e) => e.codigo === this.codigoGrafico()) ?? null);
+  actualizandoGrafico = computed(() => this.codigo() !== this.codigoGrafico());
 
   observados = computed<PuntoObservado[]>(() =>
     this.serie().filter((d) => !d.posteriorAReferencia).map((d) => ({ fecha: d.fecha, valor: d.contaminante, origen: d.origenContaminante }))
@@ -132,8 +137,16 @@ export class EstacionDetalle implements OnInit {
     this.asistenteService.estacionEnPantalla.set(codigo);   // contexto para el asistente
     this.departamento.set(e.departamento);
     const ref = e.fechaReferencia;
-    this.estacionService.getSerieDiaria(codigo, sumarDias(ref, -(DIAS_GRAFICO - 1)), ref).subscribe({ next: (s) => this.serie.set(s), error: () => this.serie.set([]) });
-    this.prediccionService.getProximosDias(codigo).subscribe({ next: (p) => this.proximos.set(p), error: () => this.proximos.set([]) });
+    // Serie y pronóstico se piden juntos y se aplican a la vez (el gráfico se anima una sola vez)
+    forkJoin({
+      serie: this.estacionService.getSerieDiaria(codigo, sumarDias(ref, -(DIAS_GRAFICO - 1)), ref).pipe(catchError(() => of([]))),
+      proximos: this.prediccionService.getProximosDias(codigo).pipe(catchError(() => of([] as Prediccion[]))),
+    }).subscribe(({ serie, proximos }) => {
+      if (this.codigo() !== codigo) return;   // ya se eligió otra estación
+      this.serie.set(serie);
+      this.proximos.set(proximos);
+      this.codigoGrafico.set(codigo);
+    });
     this.prediccionService.getHistorial(codigo, sumarDias(ref, -(DIAS_HISTORIAL - 1)), ref).subscribe({
       next: (h) => this.historial.set([...h].reverse()),
       error: () => this.historial.set([]),

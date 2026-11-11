@@ -19,3 +19,7 @@
 /* Gráfico del mismo alto que la tarjeta de próximos días */
 .split--parejo { align-items: stretch; }
 .card--grafico { display: flex; flex-direction: column; }
+
+/* Mientras llega la serie de la estación elegida, el gráfico anterior se atenúa (no se anima con datos mezclados) */
+.split { transition: opacity .2s ease; }
+.split--actualizando { opacity: .55; pointer-events: none; }
