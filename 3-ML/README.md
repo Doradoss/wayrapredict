@@ -111,7 +111,21 @@ La v1 y la v2 se conservan para mostrar la evolución del modelo y porque sus pr
 
 En Spyder se puede ejecutar cada script por celdas (`# %%`), con la carpeta de trabajo en `3-ML/`.
 
-## 7. Herramientas
+## 7. Proceso de predicción en la nube (Docker + Azure Container Instances)
+
+La carpeta `proceso/` empaqueta la cadena del modelo vigente en una **imagen Docker**:
+
+- `proceso/Dockerfile`: imagen con Python 3.12, las librerías de `requirements.txt`, el código y los datos de esta carpeta.
+- `proceso/ejecutar_proceso.py`: ejecuta los pasos 1 a 7 de `modelo_hibrido/` y luego, según la variable `MODO`:
+  - `verificar` (por defecto): compara los pronósticos generados con los de la base, **sin escribir nada**;
+  - `cargar`: carga los resultados en la base con `10-CARGAR_BD.py`.
+
+**Cómo se publica y ejecuta:**
+1. GitHub Actions (`.github/workflows/proceso.yml`) construye la imagen y la publica en **GitHub Container Registry** (`ghcr.io/doradoss/wayrapredict-proceso`) cada vez que cambia `3-ML/`.
+2. **Azure Container Instances** descarga la imagen, la ejecuta una vez (sin reinicios) y se cobra solo por los segundos de uso.
+3. La conexión a la base se pasa con variables de entorno seguras (`WAYRA_DB_*`).
+
+## 8. Herramientas
 
 | Herramienta | Para qué |
 |---|---|
@@ -124,8 +138,9 @@ En Spyder se puede ejecutar cada script por celdas (`# %%`), con la carpeta de t
 | Matplotlib | Gráficos |
 | Open-Meteo | Pronósticos meteorológicos (v2) |
 | psycopg2 | Conexión con PostgreSQL |
+| Docker | Imagen del proceso de predicción |
 
-## 8. Relación con el resto de la plataforma
+## 9. Relación con el resto de la plataforma
 
 ```
 Datos OEFA ──► 3-ML (limpieza → modelo híbrido → predicciones) ──► PostgreSQL

@@ -1,0 +1,40 @@
+# Imagen Docker del proceso de predicción → GitHub Container Registry (ghcr.io/doradoss/wayrapredict-proceso).
+# Se ejecuta cuando cambia algo en 3-ML/ o a mano desde la pestaña Actions. La ejecución en Azure Container
+# Instances descarga esta imagen.
+name: Proceso de predicción · GitHub Container Registry
+
+on:
+  push:
+    branches: [main]
+    paths: ["3-ML/**", ".github/workflows/proceso.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  construir-y-publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Iniciar sesión en GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Construir y publicar la imagen
+        uses: docker/build-push-action@v6
+        with:
+          context: 3-ML
+          file: 3-ML/proceso/Dockerfile
+          push: true
+          tags: |
+            ghcr.io/doradoss/wayrapredict-proceso:latest
+            ghcr.io/doradoss/wayrapredict-proceso:${{ github.sha }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.description=Proceso de predicción de WayraPredict (modelo híbrido Prophet-LSTM)

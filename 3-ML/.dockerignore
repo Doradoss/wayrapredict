@@ -1,0 +1,6 @@
+**/__pycache__
+figuras
+modelo_hibrido/datos
+modelo_hibrido/modelos
+modelo_hibrido/figuras
+*.md
