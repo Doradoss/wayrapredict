@@ -72,6 +72,7 @@ Las contraseñas y claves se leen de **variables de entorno**; nunca están en e
 | Backend | Azure App Service (Linux, Java 17) | B1 |
 | Base de datos | Azure Database for PostgreSQL – Flexible Server | Burstable B1ms, 32 GB |
 | Archivos de los modelos | Azure Blob Storage | Standard LRS |
+| Proceso de predicción | Azure Container Instances (imagen en GitHub Container Registry) | 1 núcleo, pago por segundo |
 
 Cada cambio que se sube a la rama `main` se publica automáticamente con **GitHub Actions** (`.github/workflows/`). Las claves de producción se guardan cifradas en la configuración de Azure y en los secretos del repositorio.
 
