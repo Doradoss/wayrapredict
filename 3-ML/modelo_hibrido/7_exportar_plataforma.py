@@ -28,7 +28,7 @@ BASE = os.path.join(wc.RAIZ, "modelo_hibrido")
 ORIG = os.path.join(wc.RAIZ, "plataforma")
 DEST = os.path.join(BASE, "version_final", "plataforma")
 os.makedirs(DEST, exist_ok=True)
-COMPONENTE = json.load(open(os.path.join(BASE, "resultados", "B12_version_final.json"), encoding="utf-8"))
+COMPONENTE = json.load(open(os.path.join(BASE, "resultados", "componente_final.json"), encoding="utf-8"))
 SERIES = {"CA-CC-01": ("CA-CC-01_DIOXIDO_AZUFRE", "combinada", "SO2", "DIOXIDO_AZUFRE"),
           "CA-HUAR-01": ("CA-HUAR-01_PM10", "pasco_moquegua", "PM10", "PM10"),
           "CA-ILO-02": ("CA-ILO-02_PM10", "pasco_moquegua", "PM10", "PM10")}

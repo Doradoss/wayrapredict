@@ -1,0 +1,79 @@
+{
+ "estacion": "CA-HUAR-01",
+ "contaminante": "PM10",
+ "version": "v3",
+ "esquema": "F2c_hc",
+ "combinacion": "valor = expm1(w * yhat_prophet_log + (1 - w) * lstm_log), multiplicado por factor_duan si duan",
+ "por_horizonte": {
+  "1": {
+   "w_prophet": 0.05,
+   "duan": false,
+   "factor_duan": 1.0823,
+   "rmse_val": 4.477,
+   "cuantil_alerta": 0.695
+  },
+  "2": {
+   "w_prophet": 0.1,
+   "duan": true,
+   "factor_duan": 1.0834,
+   "rmse_val": 4.814,
+   "cuantil_alerta": 0.695
+  },
+  "3": {
+   "w_prophet": 0.15,
+   "duan": false,
+   "factor_duan": 1.0847,
+   "rmse_val": 4.838,
+   "cuantil_alerta": 0.695
+  }
+ },
+ "hiperparametros_lstm": {
+  "ventana": 14,
+  "unidades": 64,
+  "capas": 2,
+  "dropout": 0.47443671859452685,
+  "tasa_aprendizaje": 0.0012197774865118937,
+  "lote": 32,
+  "paciencia": 30,
+  "epocas_max": 400
+ },
+ "fuente_meteorologica": "icon_seamless",
+ "normalizacion_objetivo": {
+  "media": 2.9521042448919026,
+  "desviacion": 0.9069996132411904
+ },
+ "epocas": 75,
+ "cortes": {
+  "fin_entrenamiento": "2024-12-31",
+  "fin_validacion": "2025-08-31"
+ },
+ "lstm_A": "lstm_A.keras: entrenada con el entrenamiento; pronostica la validación",
+ "lstm_B": "lstm_B.keras: entrenada con entrenamiento + validación; pronostica la prueba",
+ "prophet": "prophet.json: ajuste con todos los datos hasta el fin de la prueba (el walk-forward reajusta en cada origen)",
+ "max_diferencia_reproduccion_log": 0.0,
+ "w_minimo_prophet": 0.05,
+ "completado": "En los orígenes sin pronóstico del modelo principal (ventanas con muchos días sin medición) se usa el mismo híbrido entrenado con la serie rellenada como entrada (columna fuente_componente = F2c_r en predicciones.csv)",
+ "por_horizonte_completado": {
+  "1": {
+   "w_prophet": 0.1,
+   "duan": false,
+   "factor_duan": 1.0717,
+   "rmse_val": 4.537,
+   "cuantil_alerta": 0.695
+  },
+  "2": {
+   "w_prophet": 0.1,
+   "duan": true,
+   "factor_duan": 1.0566,
+   "rmse_val": 4.796,
+   "cuantil_alerta": 0.695
+  },
+  "3": {
+   "w_prophet": 0.1,
+   "duan": false,
+   "factor_duan": 1.0646,
+   "rmse_val": 4.739,
+   "cuantil_alerta": 0.695
+  }
+ }
+}

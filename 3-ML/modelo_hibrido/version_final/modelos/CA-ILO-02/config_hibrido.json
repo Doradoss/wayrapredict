@@ -1,0 +1,79 @@
+{
+ "estacion": "CA-ILO-02",
+ "contaminante": "PM10",
+ "version": "v3",
+ "esquema": "F2c_hc",
+ "combinacion": "valor = expm1(w * yhat_prophet_log + (1 - w) * lstm_log), multiplicado por factor_duan si duan",
+ "por_horizonte": {
+  "1": {
+   "w_prophet": 0.05,
+   "duan": true,
+   "factor_duan": 1.0016,
+   "rmse_val": 2.75,
+   "cuantil_alerta": 0.5
+  },
+  "2": {
+   "w_prophet": 0.05,
+   "duan": true,
+   "factor_duan": 1.0106,
+   "rmse_val": 2.711,
+   "cuantil_alerta": 0.5
+  },
+  "3": {
+   "w_prophet": 0.05,
+   "duan": true,
+   "factor_duan": 1.0195,
+   "rmse_val": 2.581,
+   "cuantil_alerta": 0.5
+  }
+ },
+ "hiperparametros_lstm": {
+  "ventana": 7,
+  "unidades": 16,
+  "capas": 1,
+  "dropout": 0.38704931102549267,
+  "tasa_aprendizaje": 0.001869619373706447,
+  "lote": 64,
+  "paciencia": 30,
+  "epocas_max": 400
+ },
+ "fuente_meteorologica": "gfs_seamless",
+ "normalizacion_objetivo": {
+  "media": 3.045315428666231,
+  "desviacion": 0.453913460841289
+ },
+ "epocas": 157,
+ "cortes": {
+  "fin_entrenamiento": "2024-12-31",
+  "fin_validacion": "2025-08-31"
+ },
+ "lstm_A": "lstm_A.keras: entrenada con el entrenamiento; pronostica la validación",
+ "lstm_B": "lstm_B.keras: entrenada con entrenamiento + validación; pronostica la prueba",
+ "prophet": "prophet.json: ajuste con todos los datos hasta el fin de la prueba (el walk-forward reajusta en cada origen)",
+ "max_diferencia_reproduccion_log": 0.0,
+ "w_minimo_prophet": 0.05,
+ "completado": "En los orígenes sin pronóstico del modelo principal (ventanas con muchos días sin medición) se usa el mismo híbrido entrenado con la serie rellenada como entrada (columna fuente_componente = F2c_r en predicciones.csv)",
+ "por_horizonte_completado": {
+  "1": {
+   "w_prophet": 0.1,
+   "duan": true,
+   "factor_duan": 0.9932,
+   "rmse_val": 3.548,
+   "cuantil_alerta": 0.5
+  },
+  "2": {
+   "w_prophet": 0.1,
+   "duan": true,
+   "factor_duan": 1.0164,
+   "rmse_val": 3.156,
+   "cuantil_alerta": 0.5
+  },
+  "3": {
+   "w_prophet": 0.05,
+   "duan": false,
+   "factor_duan": 0.9985,
+   "rmse_val": 3.425,
+   "cuantil_alerta": 0.5
+  }
+ }
+}

@@ -1,0 +1,171 @@
+{
+  "serie": "CA-ILO-02_PM10",
+  "version": "v2",
+  "fuente": "pasco_moquegua",
+  "config_serie": {
+    "departamento": "MOQUEGUA",
+    "estacion": "CA-ILO-02",
+    "contaminante": "PM10",
+    "inicio_val": "2025-01-01",
+    "inicio_test": "2025-09-01",
+    "fin_test": "2026-06-30",
+    "regimen": false,
+    "inicio_datos": "2022-06-01",
+    "extender_dias": 3,
+    "intervalo_completo": true
+  },
+  "hiperparametros_prophet": {
+    "changepoint_prior_scale": 9.897994715039555,
+    "seasonality_prior_scale": 0.0999965162762734,
+    "seasonality_mode": "multiplicative"
+  },
+  "hiperparametros_lstm": {
+    "Residuos": {
+      "ventana": 28,
+      "unidades": 128,
+      "capas": 1,
+      "dropout": 0.13286779867314547,
+      "tasa_aprendizaje": 5.730076714504705e-05,
+      "lote": 64,
+      "epocas_max": 500,
+      "paciencia": 50
+    },
+    "Residuos intradiario": {
+      "ventana": 28,
+      "unidades": 16,
+      "capas": 1,
+      "dropout": 0.012823538774028607,
+      "tasa_aprendizaje": 0.0001729956038219136,
+      "lote": 64,
+      "epocas_max": 500,
+      "paciencia": 50
+    },
+    "Cascada": {
+      "ventana": 14,
+      "unidades": 32,
+      "capas": 1,
+      "dropout": 0.050554019442091286,
+      "tasa_aprendizaje": 0.00019848010358894193,
+      "lote": 16,
+      "epocas_max": 500,
+      "paciencia": 50
+    }
+  },
+  "epocas_optimas": {
+    "Residuos": 1,
+    "Residuos intradiario": 81,
+    "Cascada": 23
+  },
+  "alfa_residuos_por_horizonte": {
+    "Residuos": {
+      "1": 0.65,
+      "2": 0.0,
+      "3": 0.95
+    },
+    "Residuos intradiario": {
+      "1": 0.3,
+      "2": 0.95,
+      "3": 0.4
+    },
+    "Residuos global": {
+      "1": 1.0,
+      "2": 1.0,
+      "3": 1.0
+    }
+  },
+  "peso_prophet_ponderada_por_horizonte": {
+    "1": 0.2,
+    "2": 0.25,
+    "3": 0.4
+  },
+  "factor_duan": {
+    "Residuos": {
+      "1": 1.1150252047741154,
+      "2": 1.0582163510766656,
+      "3": 0.8965913301993431
+    },
+    "Residuos intradiario": {
+      "1": 0.9268851879454421,
+      "2": 1.0389214602109575,
+      "3": 0.9461006611063068
+    },
+    "Cascada": {
+      "1": 0.7826655288446775,
+      "2": 0.8764536916113852,
+      "3": 0.7375939423790521
+    },
+    "Prophet": {
+      "1": 1.1938780458697544,
+      "2": 1.2301942868048759,
+      "3": 1.2448389714561212
+    },
+    "Ponderada": {
+      "1": 0.8973406586281492,
+      "2": 0.8644552798528765,
+      "3": 0.8604541498135772
+    },
+    "Residuos global": {
+      "1": 0.9743699452324691,
+      "2": 0.9584611380895787,
+      "3": 0.8985548636374797
+    }
+  },
+  "cuantil_alerta": {
+    "Residuos": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "Residuos intradiario": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "Cascada": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "Prophet": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "Ponderada": [
+      0.5,
+      0.5,
+      0.5
+    ],
+    "Residuos global": [
+      0.5,
+      0.5,
+      0.5
+    ]
+  },
+  "cuantil_alerta_origen_movil": [
+    0.5,
+    0.5,
+    0.5
+  ],
+  "seleccion_por_horizonte": {
+    "1": "Residuos global+Duan",
+    "2": "Residuos global+Duan",
+    "3": "Residuos global+Duan"
+  },
+  "criterio_seleccion": "mínimo RMSE (µg/m³) de validación sobre los mismos pares (origen, h)",
+  "semilla": 42,
+  "versiones": {
+    "python": "3.12.11",
+    "sistema": "Windows-10-10.0.19045-SP0",
+    "numpy": "2.4.3",
+    "pandas": "3.0.2",
+    "prophet": "1.3.0",
+    "cmdstanpy": "1.3.0",
+    "statsmodels": "0.15.0",
+    "matplotlib": "3.10.8",
+    "seaborn": "0.13.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.15.1",
+    "optuna": "5.0.0"
+  }
+}

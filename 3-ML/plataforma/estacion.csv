@@ -1,0 +1,4 @@
+codigo;nombre;departamento;provincia;distrito;este;norte;zona_utm;altitud;activa
+CA-CC-01;La Oroya;Junín;Yauli;La Oroya;401757;8726374;18;3728;True
+CA-HUAR-01;Huaraucaca;Pasco;Pasco;Tinyahuarco;358735;8806535;18;4166;True
+CA-ILO-02;Ilo-Pacocha;Moquegua;Ilo;Pacocha;251618;8051342;19;30;True

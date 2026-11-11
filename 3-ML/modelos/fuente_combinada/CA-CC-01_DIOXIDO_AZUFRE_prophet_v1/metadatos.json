@@ -1,0 +1,48 @@
+{
+  "serie": "CA-CC-01_DIOXIDO_AZUFRE",
+  "version": "v1",
+  "config_serie": {
+    "departamento": "JUNIN",
+    "estacion": "CA-CC-01",
+    "contaminante": "DIOXIDO_AZUFRE",
+    "inicio_val": "2025-01-01",
+    "inicio_test": "2025-09-01",
+    "fin_test": "2026-06-30",
+    "regimen": true
+  },
+  "escala": "log1p (predicción = expm1(yhat); con Duan: exp(yhat) * factor - 1)",
+  "factor_duan_train": 1.1432740091561837,
+  "factor_duan_hasta_fin_test": 1.16521874893634,
+  "hiperparametros": {
+    "changepoint_prior_scale": 8.97496312132042,
+    "seasonality_prior_scale": 0.5708873042331309,
+    "seasonality_mode": "multiplicative"
+  },
+  "intervalo": 0.8,
+  "muestras_incertidumbre": 1000,
+  "reentrenar_cada_dias": 7,
+  "horizontes": [
+    1,
+    2,
+    3
+  ],
+  "regresores": [
+    "OPERACION"
+  ],
+  "supuesto_regresor": "OPERACION futura = último estado conocido en el origen (OPERACION_CAUSAL, mediana móvil de 7 días hacia atrás del máximo horario diario > 40 µg/m³)",
+  "semilla": 42,
+  "versiones": {
+    "python": "3.12.11",
+    "sistema": "Windows-10-10.0.19045-SP0",
+    "numpy": "2.4.3",
+    "pandas": "3.0.2",
+    "prophet": "1.3.0",
+    "cmdstanpy": "1.3.0",
+    "statsmodels": "0.15.0",
+    "matplotlib": "3.10.8",
+    "seaborn": "0.13.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.15.1",
+    "optuna": "5.0.0"
+  }
+}

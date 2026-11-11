@@ -1,19 +1,15 @@
 # WayraPredict · qué NO se sube al repositorio
-# Los datos de entrada, los modelos entrenados y los resultados se generan con los scripts
-# y quedan solo en la computadora del equipo (son pesados y la aplicación no los necesita).
+# Los datos crudos del OEFA (varios GB) no están en esta carpeta; los datasets diarios y modelos de entrada sí.
 
-# --- Datos y artefactos del ML ---
-*.pkl
-*.keras
-*.h5
-*.joblib
+# --- ML: se suben los datos y modelos de entrada; se ignoran los resultados intermedios que generan los pasos ---
+3-ML/figuras/
+3-ML/modelo_hibrido/datos/
+3-ML/modelo_hibrido/modelos/
+3-ML/modelo_hibrido/figuras/
+3-ML/modelo_hibrido/resultados/*
+!3-ML/modelo_hibrido/resultados/componente_final.json
 *.db
 *.dump
-*.parquet
-*.csv
-*.xlsx
-*.xls
-*.dat
 **/__pycache__/
 
 # --- Backend (Java / Maven / IntelliJ) ---

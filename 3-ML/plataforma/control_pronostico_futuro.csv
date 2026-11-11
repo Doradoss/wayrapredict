@@ -1,0 +1,10 @@
+estacion;origen;horizonte;fecha_objetivo;modelo;detalle;valor
+CA-CC-01;2026-06-28;1;2026-06-29;v2;v2 (componentes guardados);59.912
+CA-CC-01;2026-06-28;2;2026-06-30;v2;v2 (componentes guardados);61.062
+CA-CC-01;2026-06-28;3;2026-07-01;v1;v1 (v2 no disponible) (Prophet reproducido (alfa = 0));53.965
+CA-HUAR-01;2026-06-30;1;2026-07-01;v2;v2 (09a);37.625
+CA-HUAR-01;2026-06-30;2;2026-07-02;v2;v2 (09a);27.668
+CA-HUAR-01;2026-06-30;3;2026-07-03;v2;v2 (09a);28.93
+CA-ILO-02;2026-05-31;1;2026-06-01;v2;v2 (componentes guardados);15.695
+CA-ILO-02;2026-05-31;2;2026-06-02;v2;v2 (componentes guardados);17.39
+CA-ILO-02;2026-05-31;3;2026-06-03;v2;v2 (componentes guardados);15.156

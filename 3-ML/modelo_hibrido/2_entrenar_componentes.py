@@ -97,6 +97,7 @@ for clave in wc.SERIES:
     est = cfg["estacion"]
     print(f"\n===== {est}")
     carpeta = os.path.join(BASE, "modelos", est)
+    os.makedirs(carpeta, exist_ok=True)
     ds = wc.cargar_dataset(clave)
     wf = wh.walk_forward_prophet(ds, clave, wp.params_prophet(clave))
     sel = pd.read_pickle(os.path.join(wc.CARPETA_CHECKPOINTS, f"08_hibrido_seleccionado_walkforward_{clave}.pkl"))
@@ -106,7 +107,7 @@ for clave in wc.SERIES:
          "fin_train": pd.Timestamp(cfg["inicio_val"]) - pd.Timedelta(days=1),
          "fin_val": pd.Timestamp(cfg["inicio_test"]) - pd.Timedelta(days=1), "wf": wf, "sel": sel,
          "q_movil": meta.get("cuantil_alerta_origen_movil"), "p_lstm": None, "carpeta": carpeta}
-    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "experimento_2", "modelos", est, "E9opt.pkl"))
+    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "v2", "modelos", est, "E9opt.pkl"))
     params, fuente = oficial["info"]["params"], oficial["info"]["fuente_meteo"]
     v_fuga = mt.variables_base(D, extras_fuga(est, ds.index))
     for nivel in ["F2b", "F2c", "F2d"]:

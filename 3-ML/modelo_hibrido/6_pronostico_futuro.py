@@ -55,6 +55,19 @@ for clave in wc.SERIES:
                                          "eleccion_val_completado": r_["info"]["eleccion_val"]}},
                  os.path.join(BASE, "modelos", est, "F2c_hc.pkl"))
     print(f"{est}: F2c_hc = {len(a)} pronósticos de F2c_h + {int(falta.sum())} de F2c_r", flush=True)
+    # predicciones y configuración finales del modelo guardado (version_final/modelos/<estación>/)
+    comp[["origen", "horizonte", "fecha_objetivo", "particion", "observado", "valor", "limite_inferior", "limite_superior",
+          "limite_alerta", "fuente_componente"]].to_csv(os.path.join(destino, "predicciones.csv"), sep=";", index=False,
+                                                       encoding="utf-8-sig")
+    ruta_cfg = os.path.join(destino, "config_hibrido.json")
+    if os.path.exists(ruta_cfg):
+        c = json.load(open(ruta_cfg, encoding="utf-8"))
+        c.update({"esquema": "F2c_hc",
+                  "completado": "En los orígenes sin pronóstico del modelo principal (ventanas con muchos días sin medición) "
+                                "se usa el mismo híbrido entrenado con la serie rellenada como entrada (columna "
+                                "fuente_componente = F2c_r en predicciones.csv)",
+                  "por_horizonte_completado": {str(h): v for h, v in r_["info"]["eleccion_val"].items()}})
+        json.dump(c, open(ruta_cfg, "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
     # --- 2. pronóstico desde el último día con medición
     ds = wc.cargar_dataset(clave)
@@ -77,7 +90,7 @@ for clave in wc.SERIES:
     fin_train = pd.Timestamp(cfg["inicio_val"]) - pd.Timedelta(days=1)
     D = {"clave": clave, "cfg": cfg, "ds": ds, "est": est, "tag": est, "fin_train": fin_train,
          "fin_val": pd.Timestamp(cfg["inicio_test"]) - pd.Timedelta(days=1), "carpeta": destino}
-    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "experimento_2", "modelos", est, "E9opt.pkl"))
+    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "v2", "modelos", est, "E9opt.pkl"))
     p, fuente = oficial["info"]["params"], oficial["info"]["fuente_meteo"]
     v = mt.variables_base(D, ve.extras(est, ds.index))
     rel = ve.DATASET[ve.DATASET["estacion"] == est]

@@ -1,7 +1,7 @@
 # %% [markdown]
 # # Versión 3 — guardar los modelos entrenados (LSTM .keras, Prophet y configuración del híbrido)
 #
-# Reentrena la LSTM del componente elegido (resultados/B12_version_final.json) con la misma semilla, datos e hiperparámetros (reproduce las
+# Reentrena la LSTM del componente elegido (resultados/componente_final.json) con la misma semilla, datos e hiperparámetros (reproduce las
 # predicciones guardadas) y guarda en version_final/modelos/<estación>/:
 #   lstm_A.keras (entrenada con train; pronostica validación), lstm_B.keras (train + val; pronostica la prueba),
 #   prophet.json (Prophet ajustado hasta el fin de la prueba), config_hibrido.json (w, Duan, cuantil de alerta,
@@ -30,7 +30,7 @@ sys.path.insert(0, os.path.abspath("modelo_hibrido"))
 import v3_entradas as ve
 
 BASE = os.path.join(wc.RAIZ, "modelo_hibrido")
-COMPONENTE = json.load(open(os.path.join(BASE, "resultados", "B12_version_final.json"), encoding="utf-8"))
+COMPONENTE = json.load(open(os.path.join(BASE, "resultados", "componente_final.json"), encoding="utf-8"))
 
 
 for clave in wc.SERIES:
@@ -47,9 +47,9 @@ for clave in wc.SERIES:
          "fin_train": pd.Timestamp(cfg["inicio_val"]) - pd.Timedelta(days=1),
          "fin_val": pd.Timestamp(cfg["inicio_test"]) - pd.Timedelta(days=1), "wf": wf, "sel": sel,
          "q_movil": meta.get("cuantil_alerta_origen_movil"), "p_lstm": None, "carpeta": destino}
-    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "experimento_2", "modelos", est, "E9opt.pkl"))
+    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "v2", "modelos", est, "E9opt.pkl"))
     p, fuente = oficial["info"]["params"], oficial["info"]["fuente_meteo"]
-    esquema = COMPONENTE[est]
+    esquema = "F2c"   # LSTM base de la v3: los pasos siguientes (F2c_h, F2c_r, F2c_hc) la combinan con Prophet
     v = mt.variables_base(D, ve.extras(est, ds.index))
     # mismo cálculo que mt.correr_lstm, pero conservando los modelos
     wl.fijar_semillas_keras()

@@ -121,6 +121,10 @@ def serie_horaria(clave: str) -> pd.Series:
     promedios horarios construidos con los registros de 5 min (01b); antes, los horarios del OEFA
     (01), igual que la serie combinada."""
     cfg = wc.SERIES[clave]
+    # Extracto ya calculado (lo incluye el repositorio, que no lleva los archivos horarios completos)
+    ruta_extracto = os.path.join(wc.CARPETA_DATOS, f"fuente_{wc.FUENTE_DATOS}", f"serie_horaria_{clave}.pkl")
+    if os.path.exists(ruta_extracto):
+        return pd.read_pickle(ruta_extracto)
     # Pasco y Moquegua: promedios horarios de 00d (datos de 5 min, mismas reglas de validez)
     ruta_00d = os.path.join(wc.CARPETA_DATOS, "inventario_estaciones", f"02_{cfg['estacion']}_horario.pkl")
     if wc.FUENTE_DATOS == "pasco_moquegua" and os.path.exists(ruta_00d):

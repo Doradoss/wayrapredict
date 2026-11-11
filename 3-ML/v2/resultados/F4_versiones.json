@@ -1,0 +1,97 @@
+{
+ "CA-CC-01_DIOXIDO_AZUFRE": {
+  "version_2": "EF2",
+  "pesos_EF2": {
+   "1": {
+    "Principal": 0.0,
+    "x2_E9m_ecmwf_ifs025": 0.5,
+    "x1_E5_recalibracion": 0.5,
+    "x2_E8opt": 0.0
+   },
+   "2": {
+    "Principal": 0.1,
+    "x2_E8opt": 0.5,
+    "x2_E9m_ecmwf_ifs025": 0.4,
+    "x1_E8_lightgbm": 0.0
+   },
+   "3": {
+    "Principal": 0.0,
+    "x1_E7_combinacion": 0.5,
+    "x1_E5_recalibracion": 0.2,
+    "x2_E8opt": 0.3
+   }
+  },
+  "rmse_val_medio": 51.295,
+  "rmse_val_principal": 52.506
+ },
+ "CA-HUAR-01_PM10": {
+  "version_2": "EF2",
+  "pesos_EF2": {
+   "1": {
+    "Principal": 0.0,
+    "x2_E9m_icon_seamless": 0.4,
+    "x2_E9m_jma_seamless": 0.3,
+    "x1_E7_combinacion": 0.3
+   },
+   "2": {
+    "Principal": 0.0,
+    "x2_E9m_icon_seamless": 0.4,
+    "x2_E9opt": 0.2,
+    "x2_E9m_promedio": 0.4
+   },
+   "3": {
+    "Principal": 0.0,
+    "x2_E9opt": 0.5,
+    "x2_E9m_jma_seamless": 0.5,
+    "x2_E13_picos_E9opt": 0.0
+   }
+  },
+  "rmse_val_medio": 7.481,
+  "rmse_val_principal": 9.991
+ },
+ "CA-ILO-02_PM10": {
+  "version_2": "EF2",
+  "pesos_EF2": {
+   "1": {
+    "Principal": 0.0,
+    "x1_E7_combinacion": 0.4,
+    "x2_E9opt": 0.4,
+    "x1_E3_episodio_peso": 0.2
+   },
+   "2": {
+    "Principal": 0.0,
+    "x1_E7_combinacion": 0.3,
+    "x1_E5_recalibracion": 0.7
+   },
+   "3": {
+    "Principal": 0.8,
+    "x1_E7_combinacion": 0.0,
+    "x1_E3_episodio_peso": 0.2,
+    "x1_E0_lstm_replica": 0.0
+   }
+  },
+  "rmse_val_medio": 5.09,
+  "rmse_val_principal": 5.794
+ },
+ "CA-ILO-02_PM25": {
+  "version_2": "x2_E5_recalibracion",
+  "rmse_val_medio": 3.301,
+  "rmse_val_principal": 3.303,
+  "pesos_EF2": {
+   "1": {
+    "Principal": 0.0,
+    "x2_E5_recalibracion": 1.0
+   },
+   "2": {
+    "Principal": 0.0,
+    "x2_E5_recalibracion": 1.0
+   },
+   "3": {
+    "Principal": 0.0,
+    "x2_E5_recalibracion": 1.0
+   }
+  },
+  "pesos_v1": null
+ },
+ "nota": "Series de PM10 y SO2: v2 oficial corregida (correccion_ceros/C10_resultados.py, 07/10/2026). CA-ILO-02_PM25: experimento 2 original."
+}

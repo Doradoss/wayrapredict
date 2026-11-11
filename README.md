@@ -80,13 +80,17 @@ Cada cambio que se sube a la rama `main` se publica automáticamente con **GitHu
 ├── 1-backend/sql/                  usuario de base de datos con permisos mínimos
 ├── 2-frontend/wayrapredict-web/    aplicación web (Angular)
 ├── 3-ML/                           modelo de Machine Learning (Python)
-│   ├── 01-…10-*.py, wayra_*.py     preparación de datos, entrenamiento y carga en la base
-│   ├── modelo_hibrido/             modelo híbrido Prophet-LSTM que usa la plataforma
+│   ├── wayra_*.py, motor.py        funciones compartidas
+│   ├── 00…05-*.py, 04c, 04d        preparación de datos y modelo base (v1)
+│   ├── modelo_hibrido/             modelo híbrido Prophet-LSTM vigente (v3), pasos 1 a 7
+│   ├── checkpoints/, modelos/, v2/ datasets diarios y modelos que necesita la cadena
+│   ├── plataforma/                 archivos base para cargar la base de datos
+│   ├── 10-CARGAR_BD.py             carga en PostgreSQL
 │   └── esquema_wayrapredict.sql    esquema de la base de datos
 └── COMO_ENCENDER_LA_APLICACION.md  guía para ejecutarlo localmente
 ```
 
-Los datos de entrada (varios GB), los modelos entrenados y los resultados intermedios no se incluyen por su tamaño.
+El repositorio incluye los datasets diarios y los modelos que necesita el modelo vigente, así que funciona por sí solo. Solo los datos crudos del OEFA (varios GB) no se incluyen por su tamaño; se usan únicamente en la preparación de datos.
 
 ## Fuente de datos
 

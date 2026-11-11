@@ -58,7 +58,7 @@ for clave in wc.SERIES:
          "fin_train": pd.Timestamp(cfg["inicio_val"]) - pd.Timedelta(days=1),
          "fin_val": pd.Timestamp(cfg["inicio_test"]) - pd.Timedelta(days=1), "wf": wf, "sel": sel.drop(columns="yhat"),
          "q_movil": meta.get("cuantil_alerta_origen_movil"), "p_lstm": None, "carpeta": os.path.join(BASE, "modelos", est)}
-    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "experimento_2", "modelos", est, "E9opt.pkl"))
+    oficial = pd.read_pickle(os.path.join(wc.RAIZ, "v2", "modelos", est, "E9opt.pkl"))
     params, fuente = oficial["info"]["params"], oficial["info"]["fuente_meteo"]
     v = mt.variables_base(D, ve.extras(est, ds.index))
     rel = ve.DATASET[ve.DATASET["estacion"] == est].reindex(ds.index)

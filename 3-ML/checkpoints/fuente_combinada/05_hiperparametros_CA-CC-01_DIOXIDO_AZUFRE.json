@@ -1,0 +1,75 @@
+{
+  "prophet": {
+    "changepoint_prior_scale": 8.97496312132042,
+    "seasonality_prior_scale": 0.5708873042331309,
+    "seasonality_mode": "multiplicative"
+  },
+  "rmse_val": {
+    "prophet": 53.70736733863996,
+    "prophet_defecto": 54.99500107658097,
+    "lstm": 57.409960428873696,
+    "lstm_defecto": 60.775839487711586,
+    "hibrido_v2": 52.768445700257665,
+    "hibrido_v2_defecto": 54.4746603897843,
+    "cascada": 58.60508514815734,
+    "cascada_defecto": 61.56329459869843,
+    "hibrido_v2_intra": 52.78620536715886,
+    "hibrido_v2_intra_defecto": 54.4746603897843
+  },
+  "lstm": {
+    "ventana": 7,
+    "unidades": 64,
+    "capas": 1,
+    "dropout": 0.4517171044341069,
+    "tasa_aprendizaje": 0.0004094839558404024,
+    "lote": 64,
+    "paciencia": 30,
+    "epocas_max": 400
+  },
+  "hibrido_v2": {
+    "ventana": 7,
+    "unidades": 64,
+    "capas": 2,
+    "dropout": 0.24115298752485279,
+    "tasa_aprendizaje": 0.00020357231170294902,
+    "lote": 16,
+    "paciencia": 50,
+    "epocas_max": 500
+  },
+  "cascada": {
+    "ventana": 7,
+    "unidades": 64,
+    "capas": 1,
+    "dropout": 0.4415418153481861,
+    "tasa_aprendizaje": 0.00022856920934981559,
+    "lote": 64,
+    "paciencia": 50,
+    "epocas_max": 500
+  },
+  "hibrido_v2_intra": {
+    "ventana": 7,
+    "unidades": 64,
+    "capas": 2,
+    "dropout": 0.2543208961968241,
+    "tasa_aprendizaje": 0.0008921387608235631,
+    "lote": 64,
+    "paciencia": 50,
+    "epocas_max": 500
+  },
+  "nota": "Elegidos solo con la validación (walk-forward). RMSE en µg/m³, promedio h = 1..3.",
+  "fuente": "combinada",
+  "versiones": {
+    "python": "3.12.11",
+    "sistema": "Windows-10-10.0.19045-SP0",
+    "numpy": "2.4.3",
+    "pandas": "3.0.2",
+    "prophet": "1.3.0",
+    "cmdstanpy": "1.3.0",
+    "statsmodels": "0.15.0",
+    "matplotlib": "3.10.8",
+    "seaborn": "0.13.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.15.1",
+    "optuna": "5.0.0"
+  }
+}

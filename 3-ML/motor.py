@@ -23,8 +23,8 @@ import wayra_comun as wc
 import wayra_lstm as wl
 import wayra_hibrido as wh
 
-BASE = os.path.join(wc.RAIZ, "experimento_2")
-EXP1 = os.path.join(wc.RAIZ, "experimento_mejoras")
+BASE = os.path.join(wc.RAIZ, "v2")
+EXP1 = os.path.join(wc.RAIZ, "v2")
 H = wc.HORIZONTES
 NH = len(H)
 GRILLA = np.round(np.arange(0, 1.0001, 0.05), 2)

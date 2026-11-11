@@ -1,0 +1,79 @@
+{
+  "serie": "CA-ILO-02_PM10",
+  "version": "v1",
+  "config_serie": {
+    "departamento": "MOQUEGUA",
+    "estacion": "CA-ILO-02",
+    "contaminante": "PM10",
+    "inicio_val": "2025-01-01",
+    "inicio_test": "2025-09-01",
+    "fin_test": "2026-06-30",
+    "regimen": false,
+    "inicio_datos": "2022-06-01",
+    "extender_dias": 3,
+    "intervalo_completo": true
+  },
+  "variables": [
+    "y_log",
+    "y_falta",
+    "TEMPERATURA",
+    "HUMEDAD_RELATIVA",
+    "VELOCIDAD_VIENTO",
+    "PRESION_BAROMETRICA",
+    "PRECIPITACION",
+    "VIENTO_SIN",
+    "VIENTO_COS",
+    "meteo_falta",
+    "sem_sin",
+    "sem_cos",
+    "anio_sin",
+    "anio_cos"
+  ],
+  "ventana": 28,
+  "horizontes": [
+    1,
+    2,
+    3
+  ],
+  "limite_ffill": 3,
+  "min_fraccion_observada": 0.5,
+  "hiperparametros": {
+    "unidades": 32,
+    "capas": 1,
+    "dropout": 0.45429389222654215,
+    "tasa_aprendizaje": 0.0010095831659317702,
+    "lote": 16,
+    "epocas_max": 400,
+    "paciencia": 30,
+    "ventana": 28
+  },
+  "epocas_optimas": 6,
+  "factores_duan": {
+    "A": [
+      1.0738621603083718,
+      1.0746623224810412,
+      1.0734899780316396
+    ],
+    "B": [
+      1.0669855000211497,
+      1.0829917839320022,
+      1.0735159514260697
+    ]
+  },
+  "escala": "log1p estandarizado; valor = expm1(yhat_log); con Duan: exp(yhat_log)*factor - 1",
+  "semilla": 42,
+  "versiones": {
+    "python": "3.12.11",
+    "sistema": "Windows-10-10.0.19045-SP0",
+    "numpy": "2.4.3",
+    "pandas": "3.0.2",
+    "prophet": "1.3.0",
+    "cmdstanpy": "1.3.0",
+    "statsmodels": "0.15.0",
+    "matplotlib": "3.10.8",
+    "seaborn": "0.13.2",
+    "tensorflow": "2.21.0",
+    "keras": "3.15.1",
+    "optuna": "5.0.0"
+  }
+}
