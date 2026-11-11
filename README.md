@@ -64,6 +64,8 @@ Las contraseñas y claves se leen de **variables de entorno**; nunca están en e
 
 ## Despliegue en la nube (Microsoft Azure)
 
+**Plataforma en línea:** https://www.wayrapredict.me · **API:** https://api.wayrapredict.me (documentación en `/doc/swagger-ui/index.html`)
+
 | Componente | Servicio de Azure | Plan |
 |---|---|---|
 | Frontend | Azure Static Web Apps | Free |
