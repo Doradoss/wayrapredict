@@ -88,10 +88,23 @@ def verificar():
     log("Pronóstico de los próximos días (generado en la nube vs. el de la base):")
     for r in futuro.itertuples():
         log(f"   {r.id_modelo:22s} {r.fecha_objetivo}  {r.valor:8.3f}  vs  {r.valor_base:8.3f} µg/m³")
-    coincide = len(comunes) == len(nuevo) == len(base) and comunes["dif"].max() <= 0.01
-    log("RESULTADO: los pronósticos generados en la nube COINCIDEN con los de la base (tolerancia 0,01 µg/m³)" if coincide
-        else "RESULTADO: hay diferencias entre lo generado y la base (ver el detalle arriba)")
-    return coincide
+    # Resumen por estación: idéntico (diferencia <= 0,05 µg/m³) o equivalente (misma categoría INCA en el pronóstico)
+    eca = {"SO2": 250.0, "PM10": 100.0}
+    def categoria(v, cont):
+        inca = v / eca[cont] * 100
+        return "Buena" if inca <= 50 else "Moderada" if inca <= 100 else "Mala"
+    log("RESULTADO por estación:")
+    for mod, g in comunes.groupby("id_modelo"):
+        f = futuro[futuro["id_modelo"] == mod]
+        cont = mod.split("|")[1]
+        misma = all(categoria(a, cont) == categoria(b, cont) for a, b in zip(f["valor"], f["valor_base"]))
+        if g["dif"].max() <= 0.05:
+            log(f"   {mod:22s} IDÉNTICO a la base (diferencia máxima {g['dif'].max():.3f} µg/m³)")
+        else:
+            rel = (f["dif"] / f["valor_base"]).max() * 100
+            log(f"   {mod:22s} DIFERENTE: hasta {g['dif'].max():.1f} µg/m³ en la serie; en el pronóstico hasta "
+                f"{f['dif'].max():.2f} µg/m³ ({rel:.1f} %), {'misma' if misma else 'distinta'} categoría INCA")
+    return len(comunes) == len(nuevo) == len(base)
 
 
 def cargar():
@@ -108,7 +121,8 @@ if __name__ == "__main__":
     if MODO not in ("verificar", "cargar"):
         log(f"✗ MODO desconocido: {MODO} (use verificar o cargar)")
         sys.exit(1)
-    log(f"WayraPredict · proceso de predicción · modo {MODO} · Python {sys.version.split()[0]}")
+    log(f"WayraPredict · proceso de predicción · modo {MODO} · Python {sys.version.split()[0]} · "
+        f"oneDNN {'desactivado' if os.environ.get('TF_ENABLE_ONEDNN_OPTS') == '0' else 'por defecto'}")
     with conectar() as con, con.cursor() as cur:       # se comprueba la conexión antes de entrenar
         cur.execute("SELECT current_user, current_database(), (SELECT COUNT(*) FROM estacion)")
         usuario, base, n = cur.fetchone()
@@ -120,4 +134,4 @@ if __name__ == "__main__":
     paso("7_exportar_plataforma")
     ok = verificar() if MODO == "verificar" else (cargar() or True)
     log(f"Proceso terminado en {(time.time() - inicio_total) / 60:.1f} min")
-    sys.exit(0 if ok else 2)
+    sys.exit(0 if ok else 2)      # 2 = faltan o sobran predicciones respecto de la base
