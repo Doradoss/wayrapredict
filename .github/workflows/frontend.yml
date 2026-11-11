@@ -1,0 +1,37 @@
+# Despliegue del frontend (Angular) en Azure Static Web Apps.
+# Se ejecuta cuando cambia algo en 2-frontend/ o a mano desde la pestaña Actions.
+name: Frontend · Azure Static Web Apps
+
+on:
+  push:
+    branches: [main]
+    paths: ["2-frontend/wayrapredict-web/**", ".github/workflows/frontend.yml"]
+  workflow_dispatch:
+
+jobs:
+  compilar-y-desplegar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: 2-frontend/wayrapredict-web/package-lock.json
+
+      - name: Compilar (configuración de producción)
+        working-directory: 2-frontend/wayrapredict-web
+        run: |
+          npm ci
+          npx ng build --configuration production
+
+      - name: Publicar en Azure Static Web Apps
+        uses: Azure/static-web-apps-deploy@v1
+        with:
+          azure_static_web_apps_api_token: ${{ secrets.AZURE_STATIC_WEB_APPS_API_TOKEN }}
+          action: upload
+          app_location: 2-frontend/wayrapredict-web/dist/wayrapredict-web/browser
+          skip_app_build: true
+          skip_api_build: true
