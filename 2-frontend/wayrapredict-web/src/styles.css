@@ -155,17 +155,29 @@ h3 { color: var(--heading); font-size: 13px; font-weight: 700; }
 .tip:hover, .tip:focus-visible { background: var(--brand-softer); color: var(--fg-brand); border-color: var(--brand-soft); outline: none; }
 .tip::after, .tip::before { position: absolute; left: 50%; pointer-events: none; opacity: 0; visibility: hidden;
   transition: opacity .18s ease, transform .2s cubic-bezier(.2, .9, .3, 1.2), visibility 0s .2s; }
-.tip::after { content: attr(data-tip); top: calc(100% + 10px); transform: translate(-50%, -4px); width: max-content; max-width: min(300px, 75vw);
+.tip::after { content: attr(data-tip); top: calc(100% + 10px); transform: translate(-50%, -4px); width: max-content; max-width: min(300px, 70vw);
   padding: 10px 12px; border-radius: 8px; background: var(--tip-bg); color: var(--tip-fg); border: 1px solid var(--tip-borde);
   box-shadow: var(--shadow-lg); font-size: 12px; font-weight: 400; line-height: 1.5; letter-spacing: 0; text-align: left; text-transform: none; z-index: 25; }
 .tip::before { content: ""; top: calc(100% + 5px); width: 10px; height: 10px; background: var(--tip-bg); border-left: 1px solid var(--tip-borde);
   border-top: 1px solid var(--tip-borde); transform: translate(-50%, -4px) rotate(45deg); z-index: 26; }
 .tip:hover::after, .tip:focus-visible::after { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition-delay: 0s; }
 .tip:hover::before, .tip:focus-visible::before { opacity: 1; visibility: visible; transform: translate(-50%, 0) rotate(45deg); transition-delay: 0s; }
+/* En el celular el texto de ayuda sale como un recuadro fijo a todo el ancho, abajo (sobre el botón del asistente):
+   se lee completo en cualquier ancho y no agrega ancho a la página */
+@media (max-width: 760px) {
+  .tip::after { position: fixed; top: auto; left: 16px; right: 16px; bottom: 96px; width: auto; max-width: none; transform: translateY(6px); font-size: 13px; }
+  .tip:hover::after, .tip:focus-visible::after { transform: none; }
+  .tip::before { display: none; }
+}
 
-.content { overflow: auto; flex: 1; }
-.view { padding: 28px 32px 48px; max-width: 1240px; margin: 0 auto; animation: aparecer .35s ease both; }
+/* Solo desplazamiento vertical: los globos de ayuda ocultos (.tip::after) cuentan para el ancho y en celulares de ~412 px
+   dejaban arrastrar la página de lado (franja vacía a la derecha). Tablas y fila de estaciones tienen su propio desplazamiento. */
+.content { overflow-x: hidden; overflow-y: auto; flex: 1; }
+.view { padding: 28px 32px 48px; max-width: 1240px; margin: 0 auto; animation: fundir .35s ease both; }
 @keyframes aparecer { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+/* La pantalla entra solo con un fundido: una animación de transform en .view la haría contenedor de los elementos
+   fijos (el texto de ayuda del celular quedaría fuera de la vista) */
+@keyframes fundir { from { opacity: 0; } to { opacity: 1; } }
 .pie { border-top: 1px solid var(--border); background: var(--bg-raised); font-size: 13px; color: var(--body); transition: background-color .25s; }
 .pie__columnas { max-width: 1240px; margin: 0 auto; padding: 32px 32px 24px; display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 32px; }
 .pie__acerca p { margin-top: 10px; max-width: 320px; color: var(--body-subtle); line-height: 1.6; }
