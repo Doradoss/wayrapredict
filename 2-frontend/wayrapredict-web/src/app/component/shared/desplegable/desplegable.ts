@@ -47,6 +47,12 @@ let siguienteId = 0;
       border-radius: var(--radius); cursor: pointer; color: var(--body); animation: entrar .25s ease both; }
     .menu li.foco { background: var(--bg-surface); color: var(--heading); }
     .menu li.sel { color: var(--fg-brand); font-weight: 700; }
+    /* En el celular, a todo el ancho de su columna y más alto para tocarlo con el dedo */
+    @media (max-width: 760px) {
+      :host { min-width: 0; width: 100%; }
+      .disparador { height: 40px; }
+      .menu li { padding: 11px 10px; }
+    }
     @keyframes desplegar { from { opacity: 0; transform: translateY(-6px) scaleY(.85); } to { opacity: 1; transform: none; } }
     @keyframes entrar { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: none; } }
   `],

@@ -28,6 +28,8 @@ let siguienteId = 0;
   selector: 'app-grafico-serie',
   templateUrl: './grafico-serie.html',
   styleUrl: './grafico-serie.css',
+  // Un toque fuera del gráfico cierra el recuadro que quedó abierto con el dedo
+  host: { '(document:pointerdown)': 'tocarFuera($event)' },
 })
 export class GraficoSerie {
   observados = input<PuntoObservado[]>([]);
@@ -231,6 +233,18 @@ export class GraficoSerie {
       claseCategoria: claseCategoria(categoria),
     };
   });
+
+  // Con el mouse, el recuadro se oculta al salir del gráfico. Con el dedo se queda visible al levantarlo
+  // (en un toque la salida llega al soltar), así se puede leer; otro toque o arrastre lo mueve.
+  private host = inject(ElementRef<HTMLElement>);
+
+  tocarFuera(ev: PointerEvent): void {
+    if (this.activo() !== null && !this.host.nativeElement.contains(ev.target as Node)) this.activo.set(null);
+  }
+
+  salir(ev: PointerEvent): void {
+    if (ev.pointerType === 'mouse') this.activo.set(null);
+  }
 
   mover(ev: PointerEvent): void {
     const svg = (ev.currentTarget as SVGElement).ownerSVGElement;

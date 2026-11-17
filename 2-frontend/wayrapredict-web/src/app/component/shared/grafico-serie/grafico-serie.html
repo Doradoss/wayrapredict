@@ -54,7 +54,8 @@
       @if (d.pron) { <circle [attr.cx]="d.x" [attr.cy]="d.pron.y" r="5" class="foco foco--pron"/> }
     }
     <rect [attr.x]="izq - 10" [attr.y]="0" [attr.width]="ancho - izq - der + 20" [attr.height]="base()" class="captura"
-          (pointermove)="mover($event)" (pointerleave)="activo.set(null)"/>
+          (pointerdown)="mover($event)" (pointermove)="mover($event)" (pointerleave)="salir($event)"
+          (contextmenu)="$event.preventDefault()"/>
   </svg>
 
   @if (detalle(); as d) {

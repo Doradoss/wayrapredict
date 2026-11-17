@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, ElementRef, inject, input, signal } from '@angular/core';
 import { claseCategoria, numero } from '../../../util/formato';
 
 export interface BarraDia {
@@ -13,15 +13,16 @@ export interface BarraDia {
 // al pasar el cursor, las demás barras se atenúan. La línea punteada marca el ECA-Aire de 24 h.
 @Component({
   selector: 'app-barras-dias',
+  host: { '(document:pointerdown)': 'tocarFuera($event)' },
   template: `
     @for (k of [clave()]; track k) {
-      <div class="barras" [class.barras--foco]="foco() !== null" [style.height.px]="alto()">
+      <div class="barras" [class.barras--foco]="foco() !== null" [style.height.px]="alto()"
+           (pointerdown)="tocar($event)" (pointermove)="tocar($event)" (pointerleave)="salir($event)" (contextmenu)="$event.preventDefault()">
         @if (ecaFrac() <= 1) {
           <div class="barras__eca" [style.bottom]="'calc(22px + ' + ecaFrac() + ' * (100% - 48px))'"><span>ECA {{ eca() }}</span></div>
         }
         @for (b of barras(); track $index) {
-          <div class="barras__col" [class.activa]="foco() === $index" (pointerenter)="foco.set($index)" (pointerleave)="foco.set(null)"
-               [title]="b.detalle ?? ''">
+          <div class="barras__col" [class.activa]="foco() === $index" [title]="b.detalle ?? ''">
             <div class="barras__pista">
               <span class="barras__valor" [style.bottom]="'calc((100% - 22px) * ' + frac(b.valor) + ' + 4px)'"
                     [style.animation-delay.ms]="500 + $index * 110">{{ num(b.valor, 0) }}</span>
@@ -32,10 +33,15 @@ export interface BarraDia {
           </div>
         }
       </div>
+      <!-- Detalle de la barra elegida (al pasar el mouse o tocar); el alto fijo evita saltos -->
+      <p class="barras__detalle">@if (foco() !== null && barras()[foco()!]; as b) { <b>{{ b.etiqueta }}:</b> {{ num(b.valor, 0) }} · {{ b.detalle }} }</p>
     }
   `,
   styles: [`
-    .barras { position: relative; display: flex; align-items: stretch; gap: 14px; margin-top: 16px; padding-top: 4px; }
+    .barras { position: relative; display: flex; align-items: stretch; gap: 14px; margin-top: 16px; padding-top: 4px;
+      touch-action: pan-y; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; }
+    .barras__detalle { min-height: 18px; margin-top: 8px; font-size: 12px; color: var(--body); }
+    .barras__detalle b { color: var(--heading); }
     .barras__col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; min-width: 0; transition: opacity .2s; cursor: default; }
     .barras--foco .barras__col:not(.activa) { opacity: .4; }
     .barras__valor { position: absolute; left: 0; right: 0; text-align: center; line-height: 18px; font-size: 13px; font-weight: 900; color: var(--heading);
@@ -63,6 +69,26 @@ export class BarrasDias {
   private maximo = computed(() => Math.max(...this.barras().map((b) => b.valor ?? 0), 0.5 * this.eca()) * 1.15);
   // Altura del ECA como fracción de la pista de las barras
   ecaFrac = computed(() => this.eca() / this.maximo());
+
+  // La barra bajo el puntero o el dedo; con el dedo, arrastrar de lado recorre las barras
+  tocar(ev: PointerEvent): void {
+    const caja = (ev.currentTarget as HTMLElement).getBoundingClientRect();
+    const n = this.barras().length;
+    if (!n || !caja.width) return;
+    const i = Math.floor(((ev.clientX - caja.left) / caja.width) * n);
+    this.foco.set(Math.min(Math.max(i, 0), n - 1));
+  }
+
+  private host = inject(ElementRef<HTMLElement>);
+
+  // Un toque fuera de las barras quita la selección hecha con el dedo
+  tocarFuera(ev: PointerEvent): void {
+    if (this.foco() !== null && !this.host.nativeElement.contains(ev.target as Node)) this.foco.set(null);
+  }
+
+  salir(ev: PointerEvent): void {
+    if (ev.pointerType === 'mouse') this.foco.set(null);
+  }
 
   // Alto relativo de la barra (0–1)
   frac(v: number | null): number {
